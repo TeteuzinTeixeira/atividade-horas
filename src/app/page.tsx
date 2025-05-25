@@ -1,57 +1,22 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useRef } from 'react';
-import Image from 'next/image';
-import mqtt from 'mqtt';
-import Cafeteira from "./../../public/Cafeteira.png";
+import { useEffect, useState } from "react";
+import Ventilador from "./component/ventilador";
+import Varal from "./component/varal";
+import Cofre from "./component/cofre";
+import Lampada from "./component/lampada";
+import Cafeteira from "./component/cafeteira";
+import mqtt from "mqtt";
 
-export default function Home() {
-  const [luminosidade, setLuminosidade] = useState(null);
-  const [cafePronto, setCafePronto] = useState(false);
-  const audioRef = useRef(null);
-  const wasPlayingRef = useRef(false);
-  const timerRef = useRef(null);
-
-  useEffect(() => {
-    audioRef.current = new Audio('/sounds/cafeteira.mp3');
-    audioRef.current.loop = true;
-  }, []);
-
-  useEffect(() => {
-    if (luminosidade === null) return;
-
-    const cafeteiraLigando = luminosidade < 500;
-
-    if (cafeteiraLigando && !wasPlayingRef.current) {
-      audioRef.current.play().catch((e) => {
-        console.warn("🔇 Som bloqueado até interação do usuário.");
-      });
-      wasPlayingRef.current = true;
-      
-      timerRef.current = setTimeout(() => {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        wasPlayingRef.current = false;
-        setCafePronto(true);
-      }, 30000);
-    }
-
-    if (!cafeteiraLigando && wasPlayingRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      wasPlayingRef.current = false;
-      clearTimeout(timerRef.current);
-      setCafePronto(false);
-    }
-  }, [luminosidade]);
-
-  /*
-  ventilador: temperatura
-  varal: umidade
-  cafeteira: luminosidade
-  cofre: proximidade
-  lampada: movimento
-  */
+export default function MainPage() {
+  const [selectedComponent, setSelectedComponent] = useState<string | null>(
+    null,
+  );
+  const [luminosidade, setLuminosidade] = useState<number | null>(null);
+  const [temperatura, setTemperatura] = useState<number | null>(null);
+  const [umidade, setUmidade] = useState<number | null>(null);
+  const [movimento, setMovimento] = useState<boolean>(false);
+  const [aproximacao, setAproximacao] = useState(null);
 
   useEffect(() => {
     const clientId = `web-client-${Math.random().toString(16).substr(2, 8)}`;
@@ -60,7 +25,8 @@ export default function Home() {
 
     const options = {
       clientId,
-      username: "FlespiToken lXXvQYumvLgFmaRCiJgBwbhaAmIXjpWa0axMTw4OgWkA1RyfKlFeVbMmTLsnML5Q",
+      username:
+        "FlespiToken lXXvQYumvLgFmaRCiJgBwbhaAmIXjpWa0axMTw4OgWkA1RyfKlFeVbMmTLsnML5Q",
       password: "",
       clean: true,
       reconnectPeriod: 1000,
@@ -68,56 +34,102 @@ export default function Home() {
 
     const client = mqtt.connect(host, options);
 
-    client.on('connect', () => {
-      console.log('✅ Conectado ao MQTT');
+    client.on("connect", () => {
+      console.log("✅ Conectado ao MQTT");
       client.subscribe(topic, (err) => {
         if (err) {
-          console.error('❌ Erro ao se inscrever no tópico:', err);
+          console.error("❌ Erro ao se inscrever no tópico:", err);
         } else {
           console.log(`📡 Inscrito no tópico: ${topic}`);
         }
       });
     });
 
-    client.on('message', (receivedTopic, message) => {
+    client.on("message", (receivedTopic, message) => {
       const messageStr = message.toString();
       try {
+        console.log(messageStr, "Mensagem recebida no tópico:", receivedTopic);
         const json = JSON.parse(messageStr);
-        if (json.luminosidade !== undefined) {
-          setLuminosidade(json.luminosidade);
-        }
+        setLuminosidade(json.luminosidade);
+        setTemperatura(json.temperatura);
+        setUmidade(json.umidade);
+        setMovimento(json.movimento === 1 ? true : false);
+        setAproximacao(json.proximidade);
       } catch (err) {
         console.error("❌ Erro ao parsear JSON MQTT:", err);
       }
     });
 
-    client.on('error', (err) => {
-      console.error('❌ Erro MQTT:', err);
+    client.on("error", (err) => {
+      console.error("❌ Erro MQTT:", err);
     });
 
     return () => {
       client.end();
-      clearTimeout(timerRef.current);
     };
-  }, []);
+  }, [luminosidade, temperatura, umidade, movimento, aproximacao]);
+
+  const renderComponent = () => {
+    switch (selectedComponent) {
+      case "Cafeteira":
+        return <Cafeteira luminosidade={luminosidade} />;
+      case "Ventilador":
+        return <Ventilador temperatura={temperatura} />;
+      case "Varal":
+        return <Varal umidade={umidade} />;
+      case "Cofre":
+        return <Cofre aproximacao={aproximacao} />;
+      case "Lampada":
+        return <Lampada movimento={movimento} />;
+      default:
+        return (
+          <p className="text-gray-600 dark:text-gray-300">
+            Selecione um item para exibir.
+          </p>
+        );
+    }
+  };
 
   return (
-    <div className="main-container">
-      {luminosidade !== null ? (
-        cafePronto ? (
-          <h2>☕ Café pronto!</h2>
-        ) : luminosidade < 500 ? (
-          <>
-            <h2>Cafeteira ligando!</h2>
-            <h2>Preparando café</h2>
-          </>
-        ) : (
-          <h2>Cafeteira!</h2>
-        )
-      ) : (
-        <h2>Cafeteira!</h2>
-      )}
-      <Image src={Cafeteira} alt="Cafeteira" className='img-cafeteira' />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-800 p-6">
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">
+        Controle de Dispositivos
+      </h1>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+        <button
+          onClick={() => setSelectedComponent("Cafeteira")}
+          className="bg-green-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-green-600 transition"
+        >
+          Cafeteira <br /> Iluminosidade
+        </button>
+        <button
+          onClick={() => setSelectedComponent("Ventilador")}
+          className="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-600 transition"
+        >
+          Ventilador <br /> Temperatura
+        </button>
+        <button
+          onClick={() => setSelectedComponent("Varal")}
+          className="bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-yellow-600 transition"
+        >
+          Varal <br /> Umidade
+        </button>
+        <button
+          onClick={() => setSelectedComponent("Cofre")}
+          className="bg-purple-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-purple-600 transition"
+        >
+          Cofre <br /> Proximidade
+        </button>
+        <button
+          onClick={() => setSelectedComponent("Lampada")}
+          className="bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-red-600 transition"
+        >
+          Lâmpada <br /> Movimento
+        </button>
+      </div>
+      <div className="w-full max-w-4xl p-6 bg-white dark:bg-gray-700 rounded-lg shadow-lg">
+        {renderComponent()}
+      </div>
     </div>
   );
 }
