@@ -45,6 +45,14 @@ export default function Home() {
     }
   }, [luminosidade]);
 
+  /*
+  ventilador: temperatura
+  varal: umidade
+  cafeteira: luminosidade
+  cofre: proximidade
+  lampada: movimento
+  */
+
   useEffect(() => {
     const clientId = `web-client-${Math.random().toString(16).substr(2, 8)}`;
     const host = "wss://mqtt.flespi.io:443";
