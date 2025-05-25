@@ -23,13 +23,11 @@ export default function Home() {
     const cafeteiraLigando = luminosidade < 500;
 
     if (cafeteiraLigando && !wasPlayingRef.current) {
-      // Toca som
       audioRef.current.play().catch((e) => {
         console.warn("🔇 Som bloqueado até interação do usuário.");
       });
       wasPlayingRef.current = true;
-
-      // Inicia timer de 30 segundos para "Café pronto"
+      
       timerRef.current = setTimeout(() => {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -39,7 +37,6 @@ export default function Home() {
     }
 
     if (!cafeteiraLigando && wasPlayingRef.current) {
-      // Parou de ligar — cancela tudo
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       wasPlayingRef.current = false;
