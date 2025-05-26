@@ -1,0 +1,263 @@
+[
+    {
+        "id": "2395cc10367cd1d9",
+        "type": "tab",
+        "label": "Clima MQTT",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "804fcb98c7e792a6",
+        "type": "mqtt in",
+        "z": "2395cc10367cd1d9",
+        "name": "recebe mqtt",
+        "topic": "topic/mateusTeixeira",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "mqtt_broker_id",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 70,
+        "y": 460,
+        "wires": [
+            [
+                "1ccf080b31a27d98"
+            ]
+        ]
+    },
+    {
+        "id": "1ccf080b31a27d98",
+        "type": "json",
+        "z": "2395cc10367cd1d9",
+        "name": "parse json",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 270,
+        "y": 460,
+        "wires": [
+            [
+                "e4ccf851457add24"
+            ]
+        ]
+    },
+    {
+        "id": "e4ccf851457add24",
+        "type": "function",
+        "z": "2395cc10367cd1d9",
+        "name": "separa os atributos",
+        "func": "return [\n  { topic: 'movimento', payload: msg.payload.movimento },\n  { topic: 'luminosidade', payload: msg.payload.luminosidade },\n  { topic: 'temperatura', payload: msg.payload.temperatura },\n  { topic: 'umidade', payload: msg.payload.umidade },\n  { topic: 'proximidade', payload: msg.payload.proximidade }\n];",
+        "outputs": 5,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 460,
+        "wires": [
+            [
+                "87925ab0e5979e76"
+            ],
+            [
+                "4915e8baa5091b35"
+            ],
+            [
+                "53d4dca8abae43b8"
+            ],
+            [
+                "9c0901df230e2599"
+            ],
+            [
+                "b1289218b33edcb0"
+            ]
+        ]
+    },
+    {
+        "id": "53d4dca8abae43b8",
+        "type": "ui_gauge",
+        "z": "2395cc10367cd1d9",
+        "name": "Temperatura",
+        "group": "ui_estufa",
+        "order": 0,
+        "width": 4,
+        "height": 3,
+        "gtype": "gage",
+        "title": "Temperatura (°C)",
+        "label": "°C",
+        "format": "{{value}}",
+        "min": "-40",
+        "max": "105.4",
+        "colors": [
+            "#24a2cc",
+            "#a8a843",
+            "#bc3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 790,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "9c0901df230e2599",
+        "type": "ui_gauge",
+        "z": "2395cc10367cd1d9",
+        "name": "Umidade",
+        "group": "ui_estufa",
+        "order": 4,
+        "width": 4,
+        "height": 3,
+        "gtype": "gage",
+        "title": "Umidade",
+        "label": "%",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 100,
+        "colors": [
+            "#e25a5a",
+            "#4b9ab4",
+            "#2a2a92"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 780,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "87925ab0e5979e76",
+        "type": "ui_gauge",
+        "z": "2395cc10367cd1d9",
+        "name": "Movimento",
+        "group": "ui_estufa",
+        "order": 0,
+        "width": 4,
+        "height": 3,
+        "gtype": "wave",
+        "title": "Movimento ",
+        "label": "",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "1",
+        "colors": [
+            "#24a2cc",
+            "#a8a843",
+            "#bc3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 790,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "4915e8baa5091b35",
+        "type": "ui_gauge",
+        "z": "2395cc10367cd1d9",
+        "name": "luminosidade",
+        "group": "ui_estufa",
+        "order": 0,
+        "width": 4,
+        "height": 3,
+        "gtype": "gage",
+        "title": "luminosidade",
+        "label": "°C",
+        "format": "{{value}}",
+        "min": "32",
+        "max": "4063",
+        "colors": [
+            "#24a2cc",
+            "#a8a843",
+            "#bc3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 790,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "b1289218b33edcb0",
+        "type": "ui_gauge",
+        "z": "2395cc10367cd1d9",
+        "name": "distancia",
+        "group": "ui_estufa",
+        "order": 4,
+        "width": 4,
+        "height": 3,
+        "gtype": "gage",
+        "title": "distancia",
+        "label": "",
+        "format": "{{value}}",
+        "min": "2",
+        "max": "404",
+        "colors": [
+            "#e25a5a",
+            "#4b9ab4",
+            "#2a2a92"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 780,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "mqtt_broker_id",
+        "type": "mqtt-broker",
+        "name": "MQTT Broker",
+        "broker": "mqtt.flespi.io",
+        "port": "1883",
+        "clientid": "mqtt-board-0775dd9a",
+        "autoConnect": true,
+        "usetls": false,
+        "compatmode": false,
+        "protocolVersion": 4,
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ui_estufa",
+        "type": "ui_group",
+        "name": "Estufa",
+        "tab": "ui_tab_estufa",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "ui_tab_estufa",
+        "type": "ui_tab",
+        "name": "Painel Estufa",
+        "icon": "dashboard",
+        "order": 1
+    }
+]
